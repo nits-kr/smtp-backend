@@ -1,0 +1,15 @@
+Error: Cannot find module 'validator'
+Require stack:
+- D:\smtpbackend\smtp-backend\src\modules\users\models\user.model.js
+- D:\smtpbackend\smtp-backend\src\modules\users\user.service.js
+- D:\smtpbackend\smtp-backend\scripts\debug_require.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1227:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1504:12)
+    at require (node:internal/modules/helpers:152:16)
+    at Object.<anonymous> (D:\smtpbackend\smtp-backend\src\modules\users\models\user.model.js:2:19)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)

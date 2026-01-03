@@ -5,14 +5,20 @@ const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const cors = require('cors');
 const httpStatus = require('http-status');
-const config = require('./config/config');
-const morgan = require('./config/morgan');
-const { authLimiter } = require('./middlewares/rateLimiter');
+const config = require('./core/config');
+const morgan = require('./core/morgan');
+const { authLimiter } = require('./core/middlewares/rateLimiter');
 const routes = require('./routes/v1');
-const { errorConverter, errorHandler } = require('./middlewares/error');
-const ApiError = require('./utils/ApiError');
+const { errorConverter, errorHandler } = require('./core/middlewares/error');
+const ApiError = require('./core/ApiError');
+const { initSocket } = require('./core/socket');
+const http = require('http');
 
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.IO with the HTTP server
+initSocket(server);
 
 if (config.env !== 'test') {
     app.use(morgan.successHandler);
@@ -37,7 +43,7 @@ app.use(compression());
 
 // enable cors
 app.use(cors());
-app.options(/.*/, cors());
+app.options(/.*$/, cors());
 
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {
@@ -58,4 +64,4 @@ app.use(errorConverter);
 // handle error
 app.use(errorHandler);
 
-module.exports = app;
+module.exports = { app, server };
