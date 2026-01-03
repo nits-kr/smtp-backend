@@ -9,6 +9,7 @@ const initSocket = (server) => {
             methods: ['GET', 'POST']
         }
     });
+    logger.info('Socket.io initialized');
 
     io.on('connection', (socket) => {
         logger.info(`Socket connected: ${socket.id}`);
