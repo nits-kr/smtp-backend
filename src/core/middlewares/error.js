@@ -8,7 +8,7 @@ const errorConverter = (err, req, res, next) => {
     let error = err;
     if (!(error instanceof ApiError)) {
         const statusCode =
-            error.statusCode || error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR;
+            error.statusCode || (error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR);
         const message = error.message || httpStatus[statusCode];
         error = new ApiError(statusCode, message, false, err.stack);
     }
@@ -21,6 +21,12 @@ const errorHandler = (err, req, res, next) => {
     if (config.env === 'production' && !err.isOperational) {
         statusCode = httpStatus.INTERNAL_SERVER_ERROR;
         message = httpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    // Fallback for undefined status code
+    if (!statusCode) {
+        statusCode = httpStatus.INTERNAL_SERVER_ERROR || 500;
+        message = message || 'Internal Server Error';
     }
 
     res.locals.errorMessage = err.message;

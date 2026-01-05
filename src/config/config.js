@@ -21,6 +21,8 @@ const envVarsSchema = Joi.object()
     FIREBASE_PROJECT_ID: Joi.string().allow('').description('Firebase Project ID'),
     FIREBASE_CLIENT_EMAIL: Joi.string().allow('').description('Firebase Client Email'),
     FIREBASE_PRIVATE_KEY: Joi.string().allow('').description('Firebase Private Key'),
+    REDIS_HOST: Joi.string().default('127.0.0.1').description('Redis host'),
+    REDIS_PORT: Joi.number().default(6379).description('Redis port'),
   })
   .unknown();
 
@@ -57,5 +59,9 @@ module.exports = {
     projectId: envVars.FIREBASE_PROJECT_ID,
     clientEmail: envVars.FIREBASE_CLIENT_EMAIL,
     privateKey: envVars.FIREBASE_PRIVATE_KEY,
+  },
+  redis: {
+    host: envVars.REDIS_HOST,
+    port: envVars.REDIS_PORT,
   },
 };

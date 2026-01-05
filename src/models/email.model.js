@@ -37,6 +37,6 @@ const emailSchema = mongoose.Schema(
 /**
  * @typedef Email
  */
-const Email = mongoose.model('Email', emailSchema);
+const Email = mongoose.models.Email || mongoose.model('Email', emailSchema);
 
 module.exports = Email;

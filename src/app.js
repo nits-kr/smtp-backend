@@ -28,6 +28,15 @@ if (config.env !== 'test') {
 // set security HTTP headers
 app.use(helmet());
 
+// enable cors
+app.use(cors({
+    origin: '*', // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    credentials: true // Enable parsing of Authorization header
+}));
+app.options(/.*$/, cors());
+
 // parse json request body
 app.use(express.json());
 
@@ -35,15 +44,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // sanitize request data
-app.use(xss());
-app.use(mongoSanitize());
+// app.use(mongoSanitize()); // Removed causing crash
 
 // gzip compression
 app.use(compression());
 
-// enable cors
-app.use(cors());
-app.options(/.*$/, cors());
+// enable cors - MOVED TO TOP
+// app.use(cors()); // removed old location
 
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {

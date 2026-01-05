@@ -7,7 +7,7 @@ const { initializeFirebase } = require('./core/firebase');
 const { initCronJobs } = require('./modules/cron/cron.service');
 
 // Connect to MongoDB
-connectDB();
+// connectDB(); // Moved to inside startServer
 
 // Initialize Firebase
 initializeFirebase();
@@ -19,6 +19,9 @@ let httpServer;
 
 const startServer = async () => {
     try {
+        // Connect to MongoDB
+        await connectDB();
+
         // Server is already created in app.js for socket.io
         httpServer = server.listen(config.port, () => {
             logger.info(`Listening to port ${config.port}`);

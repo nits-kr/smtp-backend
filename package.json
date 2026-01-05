@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --no-deprecation src/server.js",
     "start": "node src/server.js",
+    "worker": "node src/workers/email.worker.js",
     "build": "echo \"No build step required\""
   },
   "keywords": [],
@@ -15,6 +16,7 @@
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "bullmq": "^5.66.4",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
@@ -25,6 +27,7 @@
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
     "http-status": "^2.1.0",
+    "ioredis": "^5.8.2",
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.1",
