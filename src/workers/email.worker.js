@@ -49,38 +49,43 @@ const worker = new Worker(
     { connection: redisConnection }
 );
 
-const { getIo } = require('../core/socket');
+const redisPublisher = redisConnection.duplicate();
 
 logger.info('Email worker started');
 
 worker.on('completed', job => {
     logger.info(`Job ${job.id} has completed!`);
     try {
-        const io = getIo();
-        io.emit('campaign-progress', {
-            campaignId: job.data.campaignId,
-            status: 'completed',
-            email: job.data.to,
-            timestamp: new Date().toISOString()
-        });
+        const payload = {
+            event: 'campaign-progress',
+            data: {
+                campaignId: job.data.campaignId,
+                status: 'completed',
+                email: job.data.to,
+                timestamp: new Date().toISOString()
+            }
+        };
+        redisPublisher.publish('worker-events', JSON.stringify(payload));
     } catch (e) {
-        // Socket might not be initialized if worker runs separately or early
-        logger.warn(`Socket emit failed for job ${job.id}: ${e.message}`);
+        logger.warn(`Redis publish failed for job ${job.id}: ${e.message}`);
     }
 });
 
 worker.on('failed', (job, err) => {
     logger.error(`Job ${job.id} has failed with ${err.message}`);
     try {
-        const io = getIo();
-        io.emit('campaign-progress', {
-            campaignId: job.data.campaignId,
-            status: 'failed',
-            email: job.data.to,
-            error: err.message,
-            timestamp: new Date().toISOString()
-        });
+        const payload = {
+            event: 'campaign-progress',
+            data: {
+                campaignId: job.data.campaignId,
+                status: 'failed',
+                email: job.data.to,
+                error: err.message,
+                timestamp: new Date().toISOString()
+            }
+        };
+        redisPublisher.publish('worker-events', JSON.stringify(payload));
     } catch (e) {
-        logger.warn(`Socket emit failed for job ${job.id}: ${e.message}`);
+        logger.warn(`Redis publish failed for job ${job.id}: ${e.message}`);
     }
 });
