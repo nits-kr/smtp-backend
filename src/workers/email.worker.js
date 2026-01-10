@@ -20,10 +20,15 @@ const worker = new Worker(
         } = job.data;
 
         const mailOptions = {
-            from: `"${fromName}" <${fromEmail}>`,
+            // FORCE OVERRIDE: consistently use the authenticated email for "from" to avoid 436 errors
+            // We append the original "fromName" to the friendly name if needed, or just use the config one.
+            // But usually, SMTP servers require the exact authenticated email in the "From" header.
+            // We can put the original "sender" in the Reply-To if valid.
+            from: `"${fromName || 'Campaign System'}" <${process.env.SMTP_USERNAME || fromEmail}>`,
             to,
             subject,
             encoding,
+            replyTo: fromEmail, // Set Reply-To to the original sender so replies go to them
             headers: {
                 "X-Mailer": "Campaign-System",
                 ...headers
