@@ -39,6 +39,26 @@ const userSchema = mongoose.Schema(
             ref: 'Tenant', // Future proofing
             index: true,
         },
+        phone: {
+            type: String,
+            trim: true,
+        },
+        company: {
+            type: String,
+            trim: true,
+        },
+        jobTitle: {
+            type: String,
+            trim: true,
+        },
+        photo: {
+            type: Buffer,
+            required: false,
+        },
+        photoContentType: {
+            type: String,
+            required: false,
+        },
         isEmailVerified: {
             type: Boolean,
             default: false,

@@ -14,6 +14,10 @@ const ApiError = require('./core/ApiError');
 const { initSocket } = require('./core/socket');
 const http = require('http');
 
+// Register Models
+require('./modules/users/models/permission.model');
+require('./modules/users/models/role.model');
+
 const app = express();
 const server = http.createServer(app);
 

@@ -6,7 +6,19 @@ const createUser = async (userBody) => {
     if (await User.isEmailTaken(userBody.email)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
     }
+
+    if (userBody.role) {
+        const Role = require('./models/role.model');
+        const roleDoc = await Role.findOne({ name: userBody.role });
+        console.log('Lookup Role:', userBody.role, 'Found:', roleDoc ? roleDoc._id : 'null');
+        if (roleDoc) {
+            userBody.roles = [roleDoc._id];
+            console.log('Assigned Roles:', userBody.roles);
+        }
+    }
+
     const user = await User.create(userBody);
+    await user.populate('roles');
     return user;
 };
 

@@ -6,6 +6,10 @@ const register = {
         email: Joi.string().required().email(),
         password: Joi.string().required().min(8),
         name: Joi.string().required(),
+        phone: Joi.string().allow('', null),
+        company: Joi.string().allow('', null),
+        jobTitle: Joi.string().allow('', null),
+        role: Joi.string().valid('user', 'admin').default('user'),
     }),
 };
 

@@ -1,0 +1,5 @@
+{
+  "code": 500,
+  "message": "Email already taken",
+  "stack": "Error: Email already taken\n    at Object.createUser (D:\\smtpbackend\\smtp-backend\\src\\modules\\users\\user.service.js:7:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at async D:\\smtpbackend\\smtp-backend\\src\\modules\\auth\\auth.controller.js:15:18"
+}

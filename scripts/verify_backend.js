@@ -23,7 +23,10 @@ const verify = async () => {
     const testUser = {
         name: 'Test Verify User',
         email: `verify_${Date.now()}@test.com`,
-        password: 'password123'
+        password: 'password123',
+        phone: '1234567890',
+        company: 'Test Corp',
+        jobTitle: 'Developer'
     };
 
     try {
