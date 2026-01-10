@@ -9,7 +9,8 @@ const register = {
         phone: Joi.string().allow('', null),
         company: Joi.string().allow('', null),
         jobTitle: Joi.string().allow('', null),
-        role: Joi.string().valid('user', 'admin').default('user'),
+        role: Joi.string().valid('user', 'admin', 'subuser').default('user'),
+        permissions: Joi.array().items(Joi.string()),
     }),
 };
 

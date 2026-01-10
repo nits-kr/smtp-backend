@@ -23,7 +23,24 @@ const getUser = catchAsync(async (req, res) => {
     res.send(user);
 });
 
+const getUsers = catchAsync(async (req, res) => {
+    const filter = pick(req.query, ['name', 'role']);
+    if (req.query.search) {
+        filter['$or'] = [
+            { name: { $regex: req.query.search, $options: 'i' } },
+            { email: { $regex: req.query.search, $options: 'i' } },
+        ];
+    }
+    const options = pick(req.query, ['sortBy', 'limit', 'page']);
+    options.page = parseInt(options.page, 10) || 1;
+    options.limit = parseInt(options.limit, 10) || 10;
+
+    const result = await userService.queryUsers(filter, options);
+    res.send(result);
+});
+
 module.exports = {
     createUser,
     getUser,
+    getUsers,
 };

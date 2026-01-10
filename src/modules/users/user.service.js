@@ -52,10 +52,29 @@ const deleteUserById = async (userId) => {
     return user;
 };
 
+const queryUsers = async (filter, options) => {
+    const users = await User.find(filter)
+        .sort(options.sortBy)
+        .skip((options.page - 1) * options.limit)
+        .limit(options.limit)
+        .populate('roles');
+
+    const count = await User.countDocuments(filter);
+
+    return {
+        results: users,
+        page: options.page,
+        limit: options.limit,
+        totalPages: Math.ceil(count / options.limit),
+        totalResults: count,
+    };
+};
+
 module.exports = {
     createUser,
     getUserById,
     getUserByEmail,
     updateUserById,
     deleteUserById,
+    queryUsers,
 };

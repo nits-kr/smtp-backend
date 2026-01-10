@@ -34,6 +34,15 @@ const userSchema = mongoose.Schema(
                 ref: 'Role',
             },
         ],
+        role: {
+            type: String,
+            default: 'user',
+        },
+        permissions: [
+            {
+                type: String,
+            },
+        ],
         tenantId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Tenant', // Future proofing
