@@ -54,6 +54,6 @@ const campaignSchema = mongoose.Schema(
 /**
  * @typedef Campaign
  */
-const Campaign = mongoose.model('Campaign', campaignSchema);
+const Campaign = mongoose.models.Campaign || mongoose.model('Campaign', campaignSchema);
 
 module.exports = Campaign;
