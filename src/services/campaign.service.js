@@ -86,7 +86,50 @@ const getCampaigns = async () => {
     return campaigns;
 };
 
+/**
+ * Get campaign stats
+ * @param {ObjectId} campaignId
+ * @returns {Promise<Object>}
+ */
+const getCampaignStats = async (campaignId) => {
+    const { Email, Campaign } = require('../models');
+
+    const campaign = await Campaign.findById(campaignId);
+    if (!campaign) {
+        throw new Error('Campaign not found');
+    }
+
+    const stats = await Email.aggregate([
+        { $match: { campaignId: campaign._id } },
+        {
+            $group: {
+                _id: null,
+                totalSent: { $sum: 1 },
+                totalOpens: { $sum: { $cond: [{ $gt: ["$openCount", 0] }, 1, 0] } },
+                totalClicks: { $sum: { $cond: [{ $gt: ["$clickCount", 0] }, 1, 0] } },
+                // Optional: Count specific statuses
+                sentCount: { $sum: { $cond: [{ $eq: ["$status", "sent"] }, 1, 0] } },
+                failedCount: { $sum: { $cond: [{ $eq: ["$status", "failed"] }, 1, 0] } }
+            }
+        }
+    ]);
+
+    const result = stats[0] || {
+        totalSent: 0,
+        totalOpens: 0,
+        totalClicks: 0,
+        sentCount: 0,
+        failedCount: 0
+    };
+
+    return {
+        campaign,
+        stats: result
+    };
+};
+
 module.exports = {
     sendCampaign,
     getCampaigns,
+    getCampaignStats,
 };

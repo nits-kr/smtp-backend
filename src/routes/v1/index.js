@@ -4,6 +4,7 @@ const userRoute = require('../../modules/users/user.routes');
 const emailRoute = require('../../modules/email/email.routes');
 const campaignRoute = require('./campaign.route');
 const subUserRoute = require('./subUser.routes');
+const trackingRoute = require('./tracking.route');
 
 
 const router = express.Router();
@@ -28,6 +29,10 @@ const defaultRoutes = [
     {
         path: '/sub-users',
         route: subUserRoute,
+    },
+    {
+        path: '/track',
+        route: trackingRoute,
     },
 ];
 

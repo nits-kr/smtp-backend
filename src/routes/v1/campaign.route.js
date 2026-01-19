@@ -11,4 +11,8 @@ router
     .route('/')
     .get(campaignController.getCampaigns);
 
+router
+    .route('/:id/stats')
+    .get(campaignController.getCampaignStats);
+
 module.exports = router;

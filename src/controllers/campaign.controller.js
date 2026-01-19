@@ -13,7 +13,13 @@ const getCampaigns = catchAsync(async (req, res) => {
     res.send({ results: campaigns, message: "Campaigns fetched successfully", success: true });
 });
 
+const getCampaignStats = catchAsync(async (req, res) => {
+    const stats = await campaignService.getCampaignStats(req.params.id);
+    res.send({ success: true, data: stats });
+});
+
 module.exports = {
     createCampaign,
     getCampaigns,
+    getCampaignStats
 };

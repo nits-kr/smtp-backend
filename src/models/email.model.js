@@ -25,6 +25,41 @@ const emailSchema = mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        trackingId: {
+            type: String,
+            unique: true,
+            sparse: true, // Allows null/undefined for old emails
+        },
+        opens: [{
+            timestamp: Date,
+            ip: String,
+            userAgent: String,
+        }],
+        clicks: [{
+            timestamp: Date,
+            url: String,
+            ip: String,
+            userAgent: String,
+        }],
+        openCount: {
+            type: Number,
+            default: 0,
+        },
+        clickCount: {
+            type: Number,
+            default: 0,
+        },
+        campaignId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Campaign',
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'processing', 'sent', 'failed'],
+            default: 'pending',
+        },
+        messageId: String,
+        error: String,
     },
     {
         timestamps: true,

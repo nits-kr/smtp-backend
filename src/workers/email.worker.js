@@ -1,7 +1,13 @@
 const { Worker } = require('bullmq');
+const mongoose = require('mongoose');
+const connectDB = require('../core/db');
 const { redisConnection } = require('../config/redis');
 const { transporter } = require('../config/mailer');
 const logger = require('../config/logger');
+
+// Connect to MongoDB
+connectDB();
+
 
 const worker = new Worker(
     "email-queue",
@@ -16,38 +22,91 @@ const worker = new Worker(
             text,
             encoding,
             mime,
-            headers
+            headers,
+            campaignId
         } = job.data;
 
+        // --- TRACKING LOGIC START ---
+        const trackingId = require('crypto').randomUUID();
+        const { Email } = require('../models');
+
+        // Create Email document for tracking
+        let emailDoc;
+        try {
+            emailDoc = await Email.create({
+                to,
+                from: fromEmail,
+                subject,
+                body: html || text || 'MIME Content',
+                trackingId,
+                campaignId: campaignId || null, // Ensure your Email model has this field if you want to link them
+                status: 'processing'
+            });
+        } catch (dbError) {
+            logger.error(`Failed to create Email doc for tracking: ${dbError.message}`);
+            // Proceed without tracking if DB fails? Or fail job? 
+            // We'll proceed but tracking won't work for this email.
+        }
+
+        let finalHtml = html;
+        const appUrl = process.env.APP_URL || 'http://localhost:3000'; // Default fallback
+
+        if (finalHtml) {
+            // 1. Inject Open Pixel
+            const openPixel = `<img src="${appUrl}/v1/track/open/${trackingId}" alt="" width="1" height="1" style="display:none" />`;
+            if (finalHtml.includes('</body>')) {
+                finalHtml = finalHtml.replace('</body>', `${openPixel}</body>`);
+            } else {
+                finalHtml += openPixel;
+            }
+
+            // 2. Wrap Links for Click Tracking
+            // Simple regex to find hrefs. 
+            // Note: This is a basic implementation. Complex HTML might need a parser, but Cheerio isn't installed.
+            finalHtml = finalHtml.replace(/href=["'](http[^"']+)["']/g, (match, url) => {
+                const encodedUrl = encodeURIComponent(url);
+                return `href="${appUrl}/v1/track/click/${trackingId}?url=${encodedUrl}"`;
+            });
+        }
+        // --- TRACKING LOGIC END ---
+
         const mailOptions = {
-            // FORCE OVERRIDE: consistently use the authenticated email for "from" to avoid 436 errors
-            // We append the original "fromName" to the friendly name if needed, or just use the config one.
-            // But usually, SMTP servers require the exact authenticated email in the "From" header.
-            // We can put the original "sender" in the Reply-To if valid.
             from: `"${fromName || 'Campaign System'}" <${process.env.SMTP_USERNAME || fromEmail}>`,
             to,
             subject,
             encoding,
-            replyTo: fromEmail, // Set Reply-To to the original sender so replies go to them
+            replyTo: fromEmail,
             headers: {
                 "X-Mailer": "Campaign-System",
+                "X-Tracking-ID": trackingId,
                 ...headers
             }
         };
 
         if (mime) {
-            mailOptions.raw = mime;       // MIME MODE
+            mailOptions.raw = mime;
         } else {
-            if (html) mailOptions.html = html;
+            if (finalHtml) mailOptions.html = finalHtml;
             if (text) mailOptions.text = text;
         }
 
         try {
             const info = await transporter.sendMail(mailOptions);
             logger.info(`Message sent: ${info.messageId}`);
+
+            // Update status to sent
+            if (emailDoc) {
+                await Email.findByIdAndUpdate(emailDoc._id, { status: 'sent', messageId: info.messageId });
+            }
+
             return info;
         } catch (error) {
             logger.error(`Error sending email to ${to}: ${error.message}`);
+
+            // Update status to failed
+            if (emailDoc) {
+                await Email.findByIdAndUpdate(emailDoc._id, { status: 'failed', error: error.message });
+            }
             throw error;
         }
     },
